@@ -1,7 +1,7 @@
 {
   "name": "Presencia",
   "short_name": "Presencia",
-  "start_url": "./presencia-pwa.html",
+  "start_url": "./presencia-/",
   "display": "standalone",
   "background_color": "#0d0f14",
   "theme_color": "#0d0f14",
