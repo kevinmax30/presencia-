@@ -1,0 +1,16 @@
+{
+  "name": "Presencia",
+  "short_name": "Presencia",
+  "start_url": "./presencia-pwa.html",
+  "display": "standalone",
+  "background_color": "#0d0f14",
+  "theme_color": "#0d0f14",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1828/1828640.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
