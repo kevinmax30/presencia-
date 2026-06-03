@@ -141,6 +141,10 @@
   .card.outside .status-text { color: var(--outside); }
   .card-ts   { font-family: var(--font-m); font-size: 0.6rem; color: var(--muted); margin-top: 0.5rem; position: relative; }
   .card-hint { font-family: var(--font-m); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); margin-top: 0.8rem; position: relative; }
+  .card-source-auto   { font-family: var(--font-m); font-size: 0.6rem; color: var(--accent); margin-top: 0.25rem; position: relative; }
+  .card-source-manual { font-family: var(--font-m); font-size: 0.6rem; color: var(--muted2); margin-top: 0.25rem; position: relative; }
+  .log-source-auto   { font-size: 0.6rem; color: var(--accent); margin-left: 0.3rem; }
+  .log-source-manual { font-size: 0.6rem; color: var(--muted2); margin-left: 0.3rem; }
 
   /* POPUP */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 1rem; }
@@ -456,7 +460,8 @@ function renderCards() {
     const card = document.createElement('div');
     card.className = 'card ' + (isIn ? 'inside' : 'outside');
     const avatar = t.photo ? `<img class="card-avatar" src="${t.photo}" alt="${t.name}">` : `<div class="card-avatar-emoji">${tenantEmoji(i)}</div>`;
-    card.innerHTML = `${avatar}<div class="card-name">${t.name}</div><div class="card-status"><span>${isIn?'✅':'❌'}</span><span class="status-text">${isIn?'DENTRO':'FUERA'}</span></div><div class="card-ts">${info.ts?'Desde '+fmtFull(info.ts):'Sin registro'}</div><div class="card-hint">Toca para registrar</div>`;
+    const sourceHTML = info.ts ? (info.source === "auto" ? `<div class="card-source-auto">⚡ detección automática</div>` : `<div class="card-source-manual">👆 registro manual</div>`) : "";
+    card.innerHTML = `${avatar}<div class="card-name">${t.name}</div><div class="card-status"><span>${isIn?"✅":"❌"}</span><span class="status-text">${isIn?"DENTRO":"FUERA"}</span></div><div class="card-ts">${info.ts?"Desde "+fmtFull(info.ts):"Sin registro"}</div>${sourceHTML}<div class="card-hint">Toca para registrar</div>`;
     card.addEventListener('click', e => { ripple(card, e); openPopup(t.id, !isIn, i); });
     grid.appendChild(card);
   });
@@ -491,11 +496,11 @@ function confirmChange() {
   const corrected = Math.abs(Date.now() - chosenTs) > 60000;
 
   const s = loadState();
-  s[pendingId] = { inside: pendingInside, ts: chosenTs };
+  s[pendingId] = { inside: pendingInside, ts: chosenTs, source: "manual" };
   saveState(s);
 
   const logs = loadLogs();
-  logs.unshift({ id: logId(), tenantId: pendingId, inside: pendingInside, ts: chosenTs, recordedAt: Date.now(), corrected });
+  logs.unshift({ id: logId(), tenantId: pendingId, inside: pendingInside, ts: chosenTs, recordedAt: Date.now(), corrected, source: "manual" });
   saveLogs(logs);
 
   closePopup();
@@ -543,7 +548,8 @@ function renderLogs() {
       if (photo) face.innerHTML=`<img src="${photo}" alt="${name}">`;
       else face.textContent=idx>=0?tenantEmoji(idx):'👤';
       const info=document.createElement('div'); info.className='log-info';
-      info.innerHTML=`<div class="log-name">${name}</div><div class="log-desc">${l.inside?'<span class="ev-in">✅ Entró</span>':'<span class="ev-out">❌ Salió</span>'}</div>`;
+      const srcBadge = l.source === "auto" ? `<span class="log-source-auto">⚡ auto</span>` : `<span class="log-source-manual">👆 manual</span>`;
+      info.innerHTML=`<div class="log-name">${name}</div><div class="log-desc">${l.inside?"<span class=\"ev-in\">✅ Entró</span>":"<span class=\"ev-out\">❌ Salió</span>"}${srcBadge}</div>`;
       const timeDiv=document.createElement('div'); timeDiv.className='log-time'; timeDiv.textContent=fmtTime(l.ts);
       if (l.corrected) { const s=document.createElement('span'); s.className='corrected'; s.textContent='⚠ corregida'; timeDiv.appendChild(s); }
       const del=document.createElement('button'); del.className='log-del'; del.textContent='✕';
